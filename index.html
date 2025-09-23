@@ -7,201 +7,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #f72585;
-            --light: #f8f9fa;
-            --dark: #212529;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: all 0.3s ease;
-        }
-        
-        .card {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-radius: 16px;
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background: var(--secondary);
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: var(--secondary);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        .form-input {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-        }
-        
-        .form-input:focus {
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
-            border-color: var(--primary);
-            outline: none;
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .expired-screen {
-            background: linear-gradient(135deg, #f72585 0%, #3a0ca3 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        /* Melhorias para mobile */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 16px;
-            }
-            
-            .card {
-                margin: 0 8px;
-            }
-            
-            .form-input {
-                font-size: 16px; /* Previne zoom no iOS */
-            }
-            
-            .btn-primary, .btn-secondary {
-                padding: 12px 16px;
-                font-size: 16px;
-            }
-            
-            .text-3xl {
-                font-size: 1.875rem;
-            }
-        }
-        
-        .btn-primary:focus, .btn-secondary:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
-        }
-        
-        /* Animações suaves */
-        * {
-            transition: all 0.2s ease;
-        }
-        
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-        
-        .toast.show {
-            transform: translateX(0);
-        }
-        
-        .toast.success {
-            background-color: #10b981;
-        }
-        
-        .toast.error {
-            background-color: #ef4444;
-        }
-        
-        .toast.info {
-            background-color: var(--primary);
-        }
-        
-        /* Estilo para código de acesso */
-        .access-code {
-            font-family: 'Courier New', monospace;
-            font-size: 1.2em;
-            letter-spacing: 2px;
-            text-align: center;
-            padding: 10px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
     <div class="container max-w-2xl">
-        <!-- Tela de Acesso (Removida) -->
-
-        <!-- Tela de expiração (Removida) -->
-
-        <!-- Formulário (conteúdo principal) -->
-        <div id="appContent" class="fade-in hidden">
-            <div class="bg-white card p-6 md:p-8 mb-6">
+        <div id="appContent" class="fade-in">
+            <div class="bg-white card p-6 md:p-8 mb-6 rounded-2xl shadow-lg">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                     <div class="mb-4 md:mb-0">
                         <h1 class="text-3xl font-bold text-gray-800 mb-2">Solicitação de Serviço</h1>
                         <p class="text-gray-600">Preencha o formulário abaixo para solicitar nosso serviço ou produto</p>
-                    </div>
-                    <div class="text-left md:text-right">
-                        <p class="text-sm text-gray-500">Código: <span id="currentCode"></span></p>
-                        <p class="text-xs text-gray-400">Acesso válido até: <span id="accessExpiry"></span></p>
-                        <button id="logoutMainBtn" class="text-sm text-red-600 hover:text-red-800 mt-1">
-                            <i class="fas fa-sign-out-alt mr-1"></i> Sair
-                        </button>
                     </div>
                 </div>
 
                 <form id="serviceForm" class="space-y-6">
                     <div>
                         <label class="block text-gray-700 font-medium mb-2" for="name">Nome Completo</label>
-                        <input id="name" name="name" type="text" required class="form-input w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="name" name="name" type="text" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
                     </div>
 
                     <div>
                         <label class="block text-gray-700 font-medium mb-2" for="email">E-mail</label>
-                        <input id="email" name="email" type="email" required class="form-input w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="email" name="email" type="email" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
                     </div>
 
                     <div>
                         <label class="block text-gray-700 font-medium mb-2" for="phone">Telefone</label>
-                        <input id="phone" name="phone" type="tel" required class="form-input w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="phone" name="phone" type="tel" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
                     </div>
 
                     <div>
                         <label class="block text-gray-700 font-medium mb-2" for="serviceType">Tipo de Serviço</label>
-                        <select id="serviceType" name="serviceType" required class="form-input w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="serviceType" name="serviceType" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
                             <option value="">Selecione uma opção</option>
                             <option value="consultoria">Consultoria</option>
                             <option value="desenvolvimento">Desenvolvimento Web</option>
@@ -213,22 +49,22 @@
 
                     <div>
                         <label class="block text-gray-700 font-medium mb-2" for="description">Descrição do Serviço</label>
-                        <textarea id="description" name="description" rows="4" required class="form-input w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        <textarea id="description" name="description" rows="4" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="urgency">Urgência</label>
+                        <label class="block text-gray-700 font-medium mb-2">Urgência</label>
                         <div class="flex flex-wrap gap-4">
                             <label class="inline-flex items-center">
-                                <input type="radio" name="urgency" value="baixa" class="form-radio text-blue-600">
+                                <input type="radio" name="urgency" value="Baixa" required>
                                 <span class="ml-2">Baixa</span>
                             </label>
                             <label class="inline-flex items-center">
-                                <input type="radio" name="urgency" value="media" class="form-radio text-blue-600">
+                                <input type="radio" name="urgency" value="Média">
                                 <span class="ml-2">Média</span>
                             </label>
                             <label class="inline-flex items-center">
-                                <input type="radio" name="urgency" value="alta" class="form-radio text-blue-600">
+                                <input type="radio" name="urgency" value="Alta">
                                 <span class="ml-2">Alta</span>
                             </label>
                         </div>
@@ -236,7 +72,7 @@
 
                     <div>
                         <label class="block text-gray-700 font-medium mb-2" for="budget">Orçamento Previsto (R$)</label>
-                        <input id="budget" name="budget" type="number" min="0" step="0.01" class="form-input w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="budget" name="budget" type="number" min="0" step="0.01" class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
                     </div>
 
                     <div class="flex items-center">
@@ -244,112 +80,75 @@
                         <label for="terms" class="ml-2 text-gray-700">Aceito os termos e condições</label>
                     </div>
 
-                    <button type="submit" class="btn-primary w-full text-white font-bold py-3 px-4 rounded-full flex items-center justify-center">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-800 w-full text-white font-bold py-3 px-4 rounded-full flex items-center justify-center">
                         <i class="fas fa-paper-plane mr-2"></i> Enviar Solicitação
                     </button>
                 </form>
-            </div>
-
-            <div class="text-center text-gray-500 text-sm">
-                <p>© 2023 Sistema de Solicitação de Serviços. Todos os direitos reservados.</p>
             </div>
         </div>
     </div>
 
     <script>
-        // Objeto de acesso mockado para manter a estrutura
-        let currentAccess = { code: 'N/A', expires: 'N/A', name: 'Usuário' };
-
-        // Elementos DOM
-        const appContent = document.getElementById('appContent');
         const serviceForm = document.getElementById('serviceForm');
-        const logoutMainBtn = document.getElementById('logoutMainBtn');
 
-        // Funções utilitárias
-        function showMessage(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 100);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => document.body.removeChild(toast), 300);
-            }, 3000);
-        }
-
-        function setLoading(element, loading) {
-            if (loading) {
-                element.classList.add('loading');
-            } else {
-                element.classList.remove('loading');
-            }
-        }
-
-        // Exibe o aplicativo principal
-        function showMainApp() {
-            appContent.classList.remove('hidden');
-            document.getElementById('currentCode').textContent = currentAccess.code;
-            document.getElementById('accessExpiry').textContent = currentAccess.expires;
-        }
-
-        // Função de logout mockada
-        function logout() {
-            showMessage('Sessão encerrada (funcionalidade de logout desativada).', 'info');
-        }
-
-        // Event Listeners
-        logoutMainBtn.addEventListener('click', logout);
-
-        // Geração de PDF
+        // Função para gerar PDF
         function generatePDF(formData) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text('Solicitação de Serviço', 20, 20);
-            doc.setFontSize(12);
-            doc.setTextColor(100, 100, 100);
-            let yPosition = 30;
-            const addField = (label, value) => {
-                doc.text(`${label}: ${value}`, 20, yPosition);
-                yPosition += 7;
+            doc.setFontSize(16);
+            doc.text('📌 Solicitação de Serviço', 20, 20);
+
+            let y = 35;
+            const add = (label, value) => {
+                doc.text(`${label}: ${value}`, 20, y);
+                y += 10;
             };
-            addField('Nome', formData.name);
-            addField('E-mail', formData.email);
-            addField('Telefone', formData.phone);
-            addField('Tipo de Serviço', formData.serviceType);
-            addField('Urgência', formData.urgency);
-            addField('Orçamento Previsto', `R$ ${parseFloat(formData.budget).toFixed(2)}`);
-            addField('Termos Aceitos', formData.terms ? 'Sim' : 'Não');
-            yPosition += 5;
-            const descriptionLines = doc.splitTextToSize(`Descrição: ${formData.description}`, 170);
-            doc.text(descriptionLines, 20, yPosition);
-            doc.setFontSize(10);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Solicitação gerada em: ${new Date().toLocaleDateString()}`, 20, 270);
-            doc.text(`Código de acesso: ${currentAccess.code}`, 20, 280);
+
+            add("Nome", formData.name);
+            add("E-mail", formData.email);
+            add("Telefone", formData.phone);
+            add("Tipo de Serviço", formData.serviceType);
+            add("Urgência", formData.urgency);
+            add("Orçamento Previsto", `R$ ${parseFloat(formData.budget || 0).toFixed(2)}`);
+            add("Termos Aceitos", formData.terms ? "Sim" : "Não");
+
+            doc.text("Descrição:", 20, y);
+            y += 10;
+            doc.text(doc.splitTextToSize(formData.description, 170), 20, y);
+
             return doc.output('blob');
         }
 
-        // Envio para WhatsApp
+        // Função para enviar para WhatsApp
         function sendToWhatsApp(formData, pdfBlob) {
-            const message = `Olá! Gostaria de solicitar um serviço.\n\n*Detalhes:*\nNome: ${formData.name}\nServiço: ${formData.serviceType}\nUrgência: ${formData.urgency}\nCódigo: ${currentAccess.code}\n\nVerifique o anexo para mais detalhes.`;
+            const message = `📌 *Solicitação de Serviço*\n\n` +
+                `👤 Nome: ${formData.name}\n` +
+                `📧 E-mail: ${formData.email}\n` +
+                `📱 Telefone: ${formData.phone}\n` +
+                `🛠️ Serviço: ${formData.serviceType}\n` +
+                `⚡ Urgência: ${formData.urgency}\n` +
+                `💰 Orçamento Previsto: R$ ${parseFloat(formData.budget || 0).toFixed(2)}\n` +
+                `📝 Descrição: ${formData.description}\n` +
+                `✅ Termos Aceitos: ${formData.terms ? 'Sim' : 'Não'}`;
+
             const encodedMessage = encodeURIComponent(message);
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
             if (isMobile) {
                 window.open(`whatsapp://send?text=${encodedMessage}`, '_blank');
             } else {
                 window.open(`https://web.whatsapp.com/send?text=${encodedMessage}`, '_blank');
             }
+
+            // Baixar PDF automaticamente
             const url = URL.createObjectURL(pdfBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `solicitacao_servico_${formData.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            a.download = `solicitacao_${formData.name.replace(/\s+/g, '_')}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showMessage('PDF gerado e WhatsApp aberto! Anexe o PDF baixado na conversa.', 'success');
         }
 
         // Manipular envio do formulário
@@ -367,11 +166,6 @@
             };
             const pdfBlob = generatePDF(formData);
             sendToWhatsApp(formData, pdfBlob);
-        });
-
-        // Inicialização da aplicação
-        document.addEventListener('DOMContentLoaded', function() {
-            showMainApp();
         });
     </script>
 </body>
