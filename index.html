@@ -16,7 +16,13 @@
     .logo-icon {
       width: 80px;
       height: 80px;
-      color: #2563eb; /* azul Tailwind */
+      color: #2563eb;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 1.5rem;
     }
   </style>
 </head>
@@ -25,9 +31,9 @@
   <div class="container max-w-2xl">
     <div class="bg-white rounded-2xl shadow-lg p-6 space-y-6">
       <div class="flex items-center gap-4">
-        <!-- 🔧 Ícone SVG (Martelo e Chave Cruzados) -->
+        <!-- 💡 Ícone de Inovação -->
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="logo-icon" viewBox="0 0 24 24">
-          <path d="M21.707 20.293l-5.066-5.066a7.002 7.002 0 0 0-7.374-9.312l1.29 1.29a5.002 5.002 0 0 1 5.223 7.025l1.532 1.532 1.414-1.414 2.828 2.828-1.414 1.414 1.067 1.067a1 1 0 0 0 1.414-1.414zM10.586 6.586L9.172 8l1.09 1.09-7.962 7.962a1.5 1.5 0 0 0 2.122 2.122l7.962-7.962L14 10.828l1.414-1.414L10.586 6.586z"/>
+          <path d="M9 21h6v-1H9v1zm3-19C7.486 2 4 5.486 4 10c0 2.953 1.61 5.502 4 6.938V19a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.062c2.39-1.436 4-3.985 4-6.938 0-4.514-3.486-8-8-8zm2.938 13.406A1 1 0 0 0 14 16v2h-4v-2a1 1 0 0 0-.938-.594C8.09 15.174 6 12.879 6 10c0-3.309 2.691-6 6-6s6 2.691 6 6c0 2.879-2.09 5.174-4.062 6.406z"/>
         </svg>
 
         <div>
@@ -69,10 +75,23 @@
           <div id="preview" class="grid grid-cols-3 gap-2 mt-2"></div>
         </div>
 
+        <!-- ✅ Termo de autorização -->
+        <div class="flex items-start gap-2">
+          <input id="terms" name="terms" type="checkbox" required class="h-5 w-5 text-blue-600 border-gray-300 rounded mt-1">
+          <label for="terms" class="text-gray-700 text-sm leading-snug">
+            Autorizo o uso das informações e imagens enviadas para fins de execução do serviço e registro da solicitação.
+          </label>
+        </div>
+
         <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-full flex items-center justify-center gap-2 hover:bg-blue-700 transition">
           <i class="fa fa-paper-plane"></i> Enviar Solicitação via WhatsApp
         </button>
       </form>
+
+      <!-- 🧾 Rodapé -->
+      <footer>
+        Desenvolvido com 💙 por <strong>STOS Company</strong> — © 2025
+      </footer>
     </div>
   </div>
 
@@ -102,30 +121,31 @@
       const phone = document.getElementById('phone').value.trim();
       const serviceType = document.getElementById('serviceType').value.trim();
       const description = document.getElementById('description').value.trim();
+      const terms = document.getElementById('terms').checked;
 
-      if (!name || !phone || !serviceType || !description) {
-        alert('Preencha todos os campos obrigatórios.');
+      if (!name || !phone || !serviceType || !description || !terms) {
+        alert('Preencha todos os campos e aceite o termo de autorização.');
         return;
       }
 
       const message = `
-📋 *Nova Solicitação de Serviço*
+💡 *Solicitação de Serviço - Inovação e Eficiência*
 👤 *Nome:* ${name}
 📱 *Telefone:* ${phone}
 🛠️ *Serviço:* ${serviceType}
 📝 *Descrição:* ${description}
 📸 *Evidências:* ${selectedFiles.length} foto(s) anexada(s)
+✅ *Autorização:* O cliente autorizou o uso das informações para execução do serviço.
       `.trim();
 
       try {
-        // Se o dispositivo permite compartilhamento de arquivos
+        // Se o navegador suporta compartilhamento de arquivos (mobile moderno)
         if (navigator.canShare && navigator.canShare({ files: selectedFiles })) {
           await navigator.share({
             title: 'Solicitação de Serviço',
             text: message,
             files: selectedFiles,
           });
-
           alert('Solicitação enviada com sucesso pelo WhatsApp!');
         } else {
           // Fallback: envia apenas texto
