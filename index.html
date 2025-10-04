@@ -1,277 +1,207 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Solicitação de Serviços</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sistema de Solicitação - Versão Segura</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* pequeno ajuste para a prévia */
+    .preview-img { width:100%; height:120px; object-fit:cover; border-radius:6px; }
+  </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-    <div class="container max-w-2xl">
-        <div id="appContent" class="fade-in">
-            <div class="bg-white card p-6 md:p-8 mb-6 rounded-2xl shadow-lg">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                    <div class="flex items-center gap-4 mb-4 md:mb-0">
-                        <!-- LOGO: coloque o arquivo do logo na mesma pasta e nomeie como logo.jpg
-                             Caso queira usar o nome original do upload, renomeie-o para logo.jpg
-                        -->
-                        <img id="systemLogo" src="logo.jpg" alt="Logo do Sistema" class="w-20 h-20 object-contain rounded-lg shadow-sm" onerror="this.style.display='none'">
-                        <div>
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Solicitação de Serviço</h1>
-                            <p class="text-gray-600">Preencha o formulário abaixo para solicitar nosso serviço ou produto</p>
-                        </div>
-                    </div>
-                </div>
+  <div class="container max-w-2xl">
+    <div class="bg-white p-6 rounded-2xl shadow-lg">
+      <div class="flex items-center gap-4 mb-6">
+        <!-- Coloque aqui o arquivo da logo (renomeie para logo.jpg) -->
+        <img id="systemLogo" src="logo.jpg" alt="Logo" class="w-20 h-20 object-contain rounded-md shadow-sm" onerror="this.style.display='none'">
+        <h1 class="text-2xl font-bold">Solicitação de Serviço (Privado)</h1>
+      </div>
 
-                <form id="serviceForm" class="space-y-6">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="name">Nome Completo</label>
-                        <input id="name" name="name" type="text" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="email">E-mail</label>
-                        <input id="email" name="email" type="email" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="phone">Telefone</label>
-                        <input id="phone" name="phone" type="tel" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
-                    </div>
-
-                    <!-- Tipo de Serviço agora é um input de texto com sugestões (datalist) -->
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="serviceType">Tipo de Serviço</label>
-                        <input id="serviceType" name="serviceType" list="serviceSuggestions" placeholder="Descreva o tipo de serviço..." required
-                               class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
-                        <datalist id="serviceSuggestions">
-                            <option value="Consultoria"></option>
-                            <option value="Desenvolvimento Web"></option>
-                            <option value="Design Gráfico"></option>
-                            <option value="Marketing Digital"></option>
-                            <option value="Higienização de Estofados"></option>
-                            <option value="Limpeza de Colchões"></option>
-                        </datalist>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="description">Descrição do Serviço</label>
-                        <textarea id="description" name="description" rows="4" required class="form-input w-full px-4 py-3 border rounded-xl border-gray-300"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2">Urgência</label>
-                        <div class="flex flex-wrap gap-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="urgency" value="Baixa" required>
-                                <span class="ml-2">Baixa</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="urgency" value="Média">
-                                <span class="ml-2">Média</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="urgency" value="Alta">
-                                <span class="ml-2">Alta</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="budget">Orçamento Previsto (R$)</label>
-                        <input id="budget" name="budget" type="number" min="0" step="0.01" class="form-input w-full px-4 py-3 border rounded-xl border-gray-300">
-                    </div>
-
-                    <!-- Upload de evidências com pré-visualização -->
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="evidence">Evidências (fotos) — opcional</label>
-                        <input id="evidence" name="evidence" type="file" accept="image/*" multiple class="mb-3">
-                        <div id="preview" class="grid grid-cols-3 gap-3"></div>
-                    </div>
-
-                    <div class="flex items-center">
-                        <input id="terms" name="terms" type="checkbox" required class="form-checkbox h-5 w-5 text-blue-600">
-                        <label for="terms" class="ml-2 text-gray-700">Aceito os termos e condições</label>
-                    </div>
-
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-800 w-full text-white font-bold py-3 px-4 rounded-full flex items-center justify-center">
-                        <i class="fas fa-paper-plane mr-2"></i> Enviar Solicitação
-                    </button>
-                </form>
-            </div>
+      <form id="serviceForm" class="space-y-4">
+        <div>
+          <label>Nome</label>
+          <input id="name" required class="w-full border p-2 rounded" />
         </div>
+
+        <div>
+          <label>E-mail</label>
+          <input id="email" type="email" required class="w-full border p-2 rounded" />
+        </div>
+
+        <div>
+          <label>Telefone</label>
+          <input id="phone" required class="w-full border p-2 rounded" />
+        </div>
+
+        <div>
+          <label>Tipo de Serviço</label>
+          <input id="serviceType" list="serviceSuggestions" placeholder="Descreva o tipo de serviço" required class="w-full border p-2 rounded" />
+          <datalist id="serviceSuggestions">
+            <option value="Higienização de Estofados"></option>
+            <option value="Limpeza de Colchões"></option>
+            <option value="Reparo de Estofados"></option>
+          </datalist>
+        </div>
+
+        <div>
+          <label>Descrição</label>
+          <textarea id="description" required class="w-full border p-2 rounded" rows="3"></textarea>
+        </div>
+
+        <div>
+          <label>Evidências (fotos) — selecione várias</label>
+          <input id="images" type="file" accept="image/*" multiple class="block mt-2" />
+          <div id="gallery" class="grid grid-cols-3 gap-2 mt-3"></div>
+        </div>
+
+        <div class="flex gap-2">
+          <button id="submitBtn" type="submit" class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2">
+            <i class="fas fa-paper-plane"></i> Enviar Solicitação
+          </button>
+          <button id="resetBtn" type="button" class="bg-gray-200 px-4 py-2 rounded">Limpar</button>
+        </div>
+
+        <div id="linksArea" class="mt-4 text-sm"></div>
+      </form>
     </div>
+  </div>
 
 <script>
-    const serviceForm = document.getElementById('serviceForm');
-    const evidenceInput = document.getElementById('evidence');
-    const preview = document.getElementById('preview');
+  // CONFIG: ajuste a URL se backend não estiver no mesmo host
+  const API_UPLOAD_URL = '/upload'; // Ex.: 'https://meuservidor.com/upload'
 
-    // Armazena dataURLs das imagens selecionadas
-    let evidenceDataURLs = [];
+  const imagesInput = document.getElementById('images');
+  const gallery = document.getElementById('gallery');
+  const serviceForm = document.getElementById('serviceForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const linksArea = document.getElementById('linksArea');
 
-    // Pré-visualização das imagens
-    evidenceInput.addEventListener('change', async (e) => {
-        preview.innerHTML = '';
-        evidenceDataURLs = [];
-        const files = Array.from(e.target.files).slice(0, 12); // limite prático: 12 imagens
-        for (const file of files) {
-            if (!file.type.startsWith('image/')) continue;
-            const dataUrl = await fileToDataURL(file);
-            evidenceDataURLs.push(dataUrl);
+  let localFiles = []; // File objects selecionados
 
-            const img = document.createElement('img');
-            img.src = dataUrl;
-            img.alt = file.name;
-            img.className = 'w-full h-24 object-cover rounded-md shadow-sm';
-            const wrapper = document.createElement('div');
-            wrapper.className = 'border rounded-md p-1 bg-gray-50';
-            wrapper.appendChild(img);
-            preview.appendChild(wrapper);
-        }
+  imagesInput.addEventListener('change', (e) => {
+    gallery.innerHTML = '';
+    localFiles = Array.from(e.target.files).slice(0, 12); // limite 12
+    localFiles.forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const url = URL.createObjectURL(file);
+      const wrapper = document.createElement('div');
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'preview-img';
+      wrapper.appendChild(img);
+      gallery.appendChild(wrapper);
     });
+  });
 
-    function fileToDataURL(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => resolve(ev.target.result);
-            reader.onerror = (err) => reject(err);
-            reader.readAsDataURL(file);
-        });
+  resetBtn.addEventListener('click', clearForm);
+
+  function clearForm() {
+    serviceForm.reset();
+    gallery.innerHTML = '';
+    linksArea.innerHTML = '';
+    localFiles = [];
+    // Limpar input file:
+    imagesInput.value = '';
+  }
+
+  async function uploadFilesAndGetLinks(formDataObj) {
+    // monta FormData
+    const fd = new FormData();
+    fd.append('name', formDataObj.name);
+    fd.append('email', formDataObj.email);
+    fd.append('phone', formDataObj.phone);
+    fd.append('serviceType', formDataObj.serviceType);
+    fd.append('description', formDataObj.description);
+
+    for (let i = 0; i < localFiles.length; i++) {
+      fd.append('images', localFiles[i], localFiles[i].name);
     }
 
-    // Função para gerar PDF (agora async porque incorpora imagens)
-    async function generatePDF(formData, imageDataUrls = []) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-        doc.setFontSize(16);
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Enviando...';
 
-        // TÍTULO e espaço para logo (se existir)
-        const marginLeft = 40;
-        let y = 50;
-        doc.text('📌 Solicitação de Serviço', marginLeft, y);
-        y += 20;
-
-        // Detalhes do formulário
-        doc.setFontSize(11);
-        const add = (label, value) => {
-            doc.text(`${label}: ${value}`, marginLeft, y);
-            y += 16;
-        };
-
-        add("Nome", formData.name);
-        add("E-mail", formData.email);
-        add("Telefone", formData.phone);
-        add("Tipo de Serviço", formData.serviceType);
-        add("Urgência", formData.urgency);
-        add("Orçamento Previsto", `R$ ${parseFloat(formData.budget || 0).toFixed(2)}`);
-        add("Termos Aceitos", formData.terms ? "Sim" : "Não");
-
-        y += 6;
-        doc.text("Descrição:", marginLeft, y);
-        y += 14;
-        const splitDesc = doc.splitTextToSize(formData.description || '', 500);
-        doc.text(splitDesc, marginLeft, y);
-        y += (splitDesc.length * 14) + 10;
-
-        // Insere evidências como imagens no PDF
-        if (imageDataUrls && imageDataUrls.length > 0) {
-            doc.addPage();
-            doc.setFontSize(13);
-            doc.text('Evidências (Fotos):', marginLeft, 50);
-            let imgY = 70;
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const maxImgWidth = pageWidth - marginLeft * 2;
-            const maxImgHeight = (pageHeight - 100) / 2; // 2 imagens por coluna aproximadamente
-
-            for (let i = 0; i < imageDataUrls.length; i++) {
-                const dataUrl = imageDataUrls[i];
-
-                // Adiciona nova página quando necessário
-                if (imgY > pageHeight - 120) {
-                    doc.addPage();
-                    imgY = 60;
-                }
-
-                try {
-                    // Tentar inserir a imagem (jsPDF suporta JPEG/PNG data URLs)
-                    doc.addImage(dataUrl, 'JPEG', marginLeft, imgY, maxImgWidth, maxImgHeight, undefined, 'FAST');
-                    imgY += maxImgHeight + 12;
-                } catch (err) {
-                    // Se falhar por formato, tenta PNG
-                    try {
-                        doc.addImage(dataUrl, 'PNG', marginLeft, imgY, maxImgWidth, maxImgHeight, undefined, 'FAST');
-                        imgY += maxImgHeight + 12;
-                    } catch (e) {
-                        console.warn('Erro ao adicionar imagem ao PDF', e);
-                    }
-                }
-            }
-        }
-
-        // Finaliza retornando Blob
-        return doc.output('blob');
+    try {
+      const resp = await fetch(API_UPLOAD_URL, { method: 'POST', body: fd });
+      if (!resp.ok) throw new Error('Erro no upload');
+      const data = await resp.json();
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Solicitação';
+      return data; // { ok, orderId, files: [ {filename, token, url} ] }
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Solicitação';
+      console.error(err);
+      throw err;
     }
+  }
 
-    // Função para enviar para WhatsApp + baixar PDF
-    function sendToWhatsApp(formData, pdfBlob) {
-        const message = `📌 *Solicitação de Serviço*\n\n` +
-            `👤 Nome: ${formData.name}\n` +
-            `📧 E-mail: ${formData.email}\n` +
-            `📱 Telefone: ${formData.phone}\n` +
-            `🛠️ Serviço: ${formData.serviceType}\n` +
-            `⚡ Urgência: ${formData.urgency}\n` +
-            `💰 Orçamento Previsto: R$ ${parseFloat(formData.budget || 0).toFixed(2)}\n` +
-            `📝 Descrição: ${formData.description}\n` +
-            `🖼️ Evidências: ${evidenceDataURLs.length} foto(s) anexadas ao PDF\n` +
-            `✅ Termos Aceitos: ${formData.terms ? 'Sim' : 'Não'}`;
+  function openWhatsAppWithLinks(formObj, fileLinks) {
+    // Cria texto com os links (cada link em nova linha)
+    let message = `📌 *Solicitação de Serviço*\n\n`;
+    message += `👤 Nome: ${formObj.name}\n`;
+    message += `📧 E-mail: ${formObj.email}\n`;
+    message += `📱 Telefone: ${formObj.phone}\n`;
+    message += `🛠️ Serviço: ${formObj.serviceType}\n`;
+    message += `📝 Descrição: ${formObj.description}\n\n`;
+    if (fileLinks && fileLinks.length) {
+      message += `📸 Evidências (links temporários):\n`;
+      for (const f of fileLinks) {
+        message += `${f.url}\n`;
+      }
+      message += '\n';
+    }
+    message += '✅ Obrigado.';
 
-        const encodedMessage = encodeURIComponent(message);
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const encoded = encodeURIComponent(message);
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        if (isMobile) {
-            window.open(`whatsapp://send?text=${encodedMessage}`, '_blank');
-        } else {
-            window.open(`https://web.whatsapp.com/send?text=${encodedMessage}`, '_blank');
-        }
+    const url = isMobile ? `whatsapp://send?text=${encoded}` : `https://web.whatsapp.com/send?text=${encoded}`;
+    window.open(url, '_blank');
+  }
 
-        // Baixar PDF automaticamente
-        const url = URL.createObjectURL(pdfBlob);
+  serviceForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formObj = {
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      serviceType: document.getElementById('serviceType').value.trim(),
+      description: document.getElementById('description').value.trim()
+    };
+
+    try {
+      const result = await uploadFilesAndGetLinks(formObj);
+      if (!result || !result.ok) throw new Error('Upload falhou');
+
+      // Exibe links para o usuário copiar/baixar (opcional)
+      linksArea.innerHTML = '<strong>Links temporários das evidências (compartilhe via WhatsApp):</strong><br/>';
+      result.files.forEach(f => {
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `solicitacao_${formData.name.replace(/\s+/g, '_')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        a.href = f.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = f.filename + ' — abrir/baixar';
+        const div = document.createElement('div');
+        div.appendChild(a);
+        linksArea.appendChild(div);
+      });
+
+      // Abre WhatsApp com os links incluídos na mensagem
+      openWhatsAppWithLinks(formObj, result.files);
+
+      // Limpa formulário para novo preenchimento
+      clearForm();
+
+    } catch (err) {
+      alert('Erro ao enviar solicitação. Tente novamente.');
+      console.error(err);
     }
-
-    // Manipular envio do formulário (async para aguardar imagens)
-    serviceForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            serviceType: document.getElementById('serviceType').value,
-            description: document.getElementById('description').value,
-            urgency: document.querySelector('input[name="urgency"]:checked').value,
-            budget: document.getElementById('budget').value,
-            terms: document.getElementById('terms').checked
-        };
-
-        // Gera PDF incorporando as imagens (evidenceDataURLs)
-        try {
-            const pdfBlob = await generatePDF(formData, evidenceDataURLs);
-            sendToWhatsApp(formData, pdfBlob);
-        } catch (err) {
-            console.error('Erro ao gerar PDF:', err);
-            alert('Ocorreu um erro ao gerar a solicitação. Tente novamente.');
-        }
-    });
+  });
 </script>
 </body>
 </html>
