@@ -1,207 +1,144 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sistema de Solicitação - Versão Segura</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Solicitação de Serviço</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* pequeno ajuste para a prévia */
-    .preview-img { width:100%; height:120px; object-fit:cover; border-radius:6px; }
+    .preview-img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
   </style>
 </head>
+
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
   <div class="container max-w-2xl">
-    <div class="bg-white p-6 rounded-2xl shadow-lg">
-      <div class="flex items-center gap-4 mb-6">
-        <!-- Coloque aqui o arquivo da logo (renomeie para logo.jpg) -->
-        <img id="systemLogo" src="logo.jpg" alt="Logo" class="w-20 h-20 object-contain rounded-md shadow-sm" onerror="this.style.display='none'">
-        <h1 class="text-2xl font-bold">Solicitação de Serviço (Privado)</h1>
+    <div class="bg-white rounded-2xl shadow-lg p-6 space-y-6">
+      <div class="flex items-center gap-4">
+        <img src="logo.jpg" alt="Logo do Sistema" class="w-20 h-20 rounded-lg object-contain">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Solicitação de Serviço</h1>
+          <p class="text-gray-600 text-sm">Envie sua solicitação com evidências diretamente pelo WhatsApp</p>
+        </div>
       </div>
 
       <form id="serviceForm" class="space-y-4">
         <div>
-          <label>Nome</label>
-          <input id="name" required class="w-full border p-2 rounded" />
+          <label class="block font-medium text-gray-700 mb-1">Nome Completo</label>
+          <input id="name" required class="w-full border rounded-lg p-2" placeholder="Digite seu nome completo">
         </div>
 
         <div>
-          <label>E-mail</label>
-          <input id="email" type="email" required class="w-full border p-2 rounded" />
+          <label class="block font-medium text-gray-700 mb-1">Telefone</label>
+          <input id="phone" required class="w-full border rounded-lg p-2" placeholder="(DDD) 9xxxx-xxxx">
         </div>
 
         <div>
-          <label>Telefone</label>
-          <input id="phone" required class="w-full border p-2 rounded" />
-        </div>
-
-        <div>
-          <label>Tipo de Serviço</label>
-          <input id="serviceType" list="serviceSuggestions" placeholder="Descreva o tipo de serviço" required class="w-full border p-2 rounded" />
-          <datalist id="serviceSuggestions">
+          <label class="block font-medium text-gray-700 mb-1">Tipo de Serviço</label>
+          <input id="serviceType" list="services" required class="w-full border rounded-lg p-2" placeholder="Descreva o tipo de serviço">
+          <datalist id="services">
             <option value="Higienização de Estofados"></option>
             <option value="Limpeza de Colchões"></option>
-            <option value="Reparo de Estofados"></option>
+            <option value="Higienização Automotiva"></option>
+            <option value="Limpeza Residencial"></option>
           </datalist>
         </div>
 
         <div>
-          <label>Descrição</label>
-          <textarea id="description" required class="w-full border p-2 rounded" rows="3"></textarea>
+          <label class="block font-medium text-gray-700 mb-1">Descrição Detalhada</label>
+          <textarea id="description" rows="3" required class="w-full border rounded-lg p-2" placeholder="Descreva o serviço desejado ou problema"></textarea>
         </div>
 
         <div>
-          <label>Evidências (fotos) — selecione várias</label>
-          <input id="images" type="file" accept="image/*" multiple class="block mt-2" />
-          <div id="gallery" class="grid grid-cols-3 gap-2 mt-3"></div>
+          <label class="block font-medium text-gray-700 mb-1">Evidências (Fotos)</label>
+          <input id="evidence" type="file" accept="image/*" multiple class="block mt-1">
+          <div id="preview" class="grid grid-cols-3 gap-2 mt-2"></div>
         </div>
 
-        <div class="flex gap-2">
-          <button id="submitBtn" type="submit" class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2">
-            <i class="fas fa-paper-plane"></i> Enviar Solicitação
-          </button>
-          <button id="resetBtn" type="button" class="bg-gray-200 px-4 py-2 rounded">Limpar</button>
-        </div>
-
-        <div id="linksArea" class="mt-4 text-sm"></div>
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-full flex items-center justify-center gap-2 hover:bg-blue-700 transition">
+          <i class="fa fa-paper-plane"></i> Enviar Solicitação via WhatsApp
+        </button>
       </form>
     </div>
   </div>
 
-<script>
-  // CONFIG: ajuste a URL se backend não estiver no mesmo host
-  const API_UPLOAD_URL = '/upload'; // Ex.: 'https://meuservidor.com/upload'
+  <script>
+    const form = document.getElementById('serviceForm');
+    const evidenceInput = document.getElementById('evidence');
+    const preview = document.getElementById('preview');
+    let selectedFiles = [];
 
-  const imagesInput = document.getElementById('images');
-  const gallery = document.getElementById('gallery');
-  const serviceForm = document.getElementById('serviceForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const linksArea = document.getElementById('linksArea');
-
-  let localFiles = []; // File objects selecionados
-
-  imagesInput.addEventListener('change', (e) => {
-    gallery.innerHTML = '';
-    localFiles = Array.from(e.target.files).slice(0, 12); // limite 12
-    localFiles.forEach(file => {
-      if (!file.type.startsWith('image/')) return;
-      const url = URL.createObjectURL(file);
-      const wrapper = document.createElement('div');
-      const img = document.createElement('img');
-      img.src = url;
-      img.className = 'preview-img';
-      wrapper.appendChild(img);
-      gallery.appendChild(wrapper);
-    });
-  });
-
-  resetBtn.addEventListener('click', clearForm);
-
-  function clearForm() {
-    serviceForm.reset();
-    gallery.innerHTML = '';
-    linksArea.innerHTML = '';
-    localFiles = [];
-    // Limpar input file:
-    imagesInput.value = '';
-  }
-
-  async function uploadFilesAndGetLinks(formDataObj) {
-    // monta FormData
-    const fd = new FormData();
-    fd.append('name', formDataObj.name);
-    fd.append('email', formDataObj.email);
-    fd.append('phone', formDataObj.phone);
-    fd.append('serviceType', formDataObj.serviceType);
-    fd.append('description', formDataObj.description);
-
-    for (let i = 0; i < localFiles.length; i++) {
-      fd.append('images', localFiles[i], localFiles[i].name);
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Enviando...';
-
-    try {
-      const resp = await fetch(API_UPLOAD_URL, { method: 'POST', body: fd });
-      if (!resp.ok) throw new Error('Erro no upload');
-      const data = await resp.json();
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Solicitação';
-      return data; // { ok, orderId, files: [ {filename, token, url} ] }
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Solicitação';
-      console.error(err);
-      throw err;
-    }
-  }
-
-  function openWhatsAppWithLinks(formObj, fileLinks) {
-    // Cria texto com os links (cada link em nova linha)
-    let message = `📌 *Solicitação de Serviço*\n\n`;
-    message += `👤 Nome: ${formObj.name}\n`;
-    message += `📧 E-mail: ${formObj.email}\n`;
-    message += `📱 Telefone: ${formObj.phone}\n`;
-    message += `🛠️ Serviço: ${formObj.serviceType}\n`;
-    message += `📝 Descrição: ${formObj.description}\n\n`;
-    if (fileLinks && fileLinks.length) {
-      message += `📸 Evidências (links temporários):\n`;
-      for (const f of fileLinks) {
-        message += `${f.url}\n`;
-      }
-      message += '\n';
-    }
-    message += '✅ Obrigado.';
-
-    const encoded = encodeURIComponent(message);
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    const url = isMobile ? `whatsapp://send?text=${encoded}` : `https://web.whatsapp.com/send?text=${encoded}`;
-    window.open(url, '_blank');
-  }
-
-  serviceForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formObj = {
-      name: document.getElementById('name').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      serviceType: document.getElementById('serviceType').value.trim(),
-      description: document.getElementById('description').value.trim()
-    };
-
-    try {
-      const result = await uploadFilesAndGetLinks(formObj);
-      if (!result || !result.ok) throw new Error('Upload falhou');
-
-      // Exibe links para o usuário copiar/baixar (opcional)
-      linksArea.innerHTML = '<strong>Links temporários das evidências (compartilhe via WhatsApp):</strong><br/>';
-      result.files.forEach(f => {
-        const a = document.createElement('a');
-        a.href = f.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.textContent = f.filename + ' — abrir/baixar';
-        const div = document.createElement('div');
-        div.appendChild(a);
-        linksArea.appendChild(div);
+    // Mostra prévias das imagens
+    evidenceInput.addEventListener('change', e => {
+      preview.innerHTML = '';
+      selectedFiles = Array.from(e.target.files);
+      selectedFiles.forEach(file => {
+        const url = URL.createObjectURL(file);
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'preview-img';
+        preview.appendChild(img);
       });
+    });
 
-      // Abre WhatsApp com os links incluídos na mensagem
-      openWhatsAppWithLinks(formObj, result.files);
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
 
-      // Limpa formulário para novo preenchimento
-      clearForm();
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const serviceType = document.getElementById('serviceType').value.trim();
+      const description = document.getElementById('description').value.trim();
 
-    } catch (err) {
-      alert('Erro ao enviar solicitação. Tente novamente.');
-      console.error(err);
-    }
-  });
-</script>
+      if (!name || !phone || !serviceType || !description) {
+        alert('Preencha todos os campos obrigatórios.');
+        return;
+      }
+
+      const message = `
+📋 *Nova Solicitação de Serviço*
+👤 *Nome:* ${name}
+📱 *Telefone:* ${phone}
+🛠️ *Serviço:* ${serviceType}
+📝 *Descrição:* ${description}
+📸 *Evidências:* ${selectedFiles.length} foto(s) anexada(s)
+      `.trim();
+
+      try {
+        // se o navegador suporta compartilhamento com arquivos (mobile moderno)
+        if (navigator.canShare && navigator.canShare({ files: selectedFiles })) {
+          await navigator.share({
+            title: 'Solicitação de Serviço',
+            text: message,
+            files: selectedFiles,
+          });
+
+          alert('Solicitação enviada com sucesso pelo WhatsApp!');
+        } else {
+          // fallback: texto simples (sem imagens)
+          const encoded = encodeURIComponent(message);
+          const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+          const url = isMobile
+            ? `whatsapp://send?text=${encoded}`
+            : `https://web.whatsapp.com/send?text=${encoded}`;
+          window.open(url, '_blank');
+          alert('Seu dispositivo não permite envio direto de fotos. Mensagem aberta no WhatsApp.');
+        }
+
+        // limpa o formulário
+        form.reset();
+        preview.innerHTML = '';
+        selectedFiles = [];
+
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao enviar via WhatsApp. Tente novamente.');
+      }
+    });
+  </script>
 </body>
 </html>
