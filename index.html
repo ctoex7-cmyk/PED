@@ -31,8 +31,8 @@
   <div class="container max-w-2xl">
     <div class="bg-white rounded-2xl shadow-lg p-6 space-y-6">
       <div class="flex items-center gap-4">
-        <!-- 💡 Ícone de Inovação -->
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="logo-icon" viewBox="0 0 24 24">
+        <!-- Ícone de Inovação -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="logo-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M9 21h6v-1H9v1zm3-19C7.486 2 4 5.486 4 10c0 2.953 1.61 5.502 4 6.938V19a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.062c2.39-1.436 4-3.985 4-6.938 0-4.514-3.486-8-8-8zm2.938 13.406A1 1 0 0 0 14 16v2h-4v-2a1 1 0 0 0-.938-.594C8.09 15.174 6 12.879 6 10c0-3.309 2.691-6 6-6s6 2.691 6 6c0 2.879-2.09 5.174-4.062 6.406z"/>
         </svg>
 
@@ -42,40 +42,39 @@
         </div>
       </div>
 
-      <form id="serviceForm" class="space-y-4">
+      <form id="serviceForm" class="space-y-4" novalidate>
         <div>
-          <label class="block font-medium text-gray-700 mb-1">Nome Completo</label>
-          <input id="name" required class="w-full border rounded-lg p-2" placeholder="Digite seu nome completo">
+          <label for="name" class="block font-medium text-gray-700 mb-1">Nome Completo</label>
+          <input id="name" name="name" type="text" required aria-required="true" class="w-full border rounded-lg p-2" placeholder="Digite seu nome completo">
         </div>
 
         <div>
-          <label class="block font-medium text-gray-700 mb-1">Telefone</label>
-          <input id="phone" required class="w-full border rounded-lg p-2" placeholder="(DDD) 9xxxx-xxxx">
+          <label for="phone" class="block font-medium text-gray-700 mb-1">Telefone</label>
+          <input id="phone" name="phone" type="tel" inputmode="tel" required aria-required="true" class="w-full border rounded-lg p-2" placeholder="(DDD) 9xxxx-xxxx">
         </div>
 
         <div>
-          <label class="block font-medium text-gray-700 mb-1">Endereço</label>
-          <input id="address" required class="w-full border rounded-lg p-2" placeholder="Rua, número, bairro, cidade">
-        </div>
-
-        <!-- Campo sem preenchimento automático -->
-        <div>
-          <label class="block font-medium text-gray-700 mb-1">Tipo de Serviço</label>
-          <input id="serviceType" required class="w-full border rounded-lg p-2" placeholder="Descreva o tipo de serviço">
+          <label for="address" class="block font-medium text-gray-700 mb-1">Endereço</label>
+          <input id="address" name="address" type="text" required aria-required="true" class="w-full border rounded-lg p-2" placeholder="Rua, número, bairro, cidade">
         </div>
 
         <div>
-          <label class="block font-medium text-gray-700 mb-1">Descrição Detalhada</label>
-          <textarea id="description" rows="3" required class="w-full border rounded-lg p-2" placeholder="Descreva o serviço desejado ou problema"></textarea>
+          <label for="serviceType" class="block font-medium text-gray-700 mb-1">Tipo de Serviço</label>
+          <input id="serviceType" name="serviceType" type="text" required aria-required="true" class="w-full border rounded-lg p-2" placeholder="Descreva o tipo de serviço">
         </div>
 
         <div>
-          <label class="block font-medium text-gray-700 mb-1">Evidências (Fotos)</label>
-          <input id="evidence" type="file" accept="image/*" multiple class="block mt-1">
-          <div id="preview" class="grid grid-cols-3 gap-2 mt-2"></div>
+          <label for="description" class="block font-medium text-gray-700 mb-1">Descrição Detalhada</label>
+          <textarea id="description" name="description" rows="3" required aria-required="true" class="w-full border rounded-lg p-2" placeholder="Descreva o serviço desejado ou problema"></textarea>
         </div>
 
-        <!-- ✅ Termo de autorização -->
+        <div>
+          <label for="evidence" class="block font-medium text-gray-700 mb-1">Evidências (Fotos)</label>
+          <input id="evidence" name="evidence" type="file" accept="image/*" multiple class="block mt-1" aria-describedby="evidenceHelp">
+          <div id="evidenceHelp" class="text-xs text-gray-500">Envie até X fotos. Se possível, prefira imagens nítidas.</div>
+          <div id="preview" class="grid grid-cols-3 gap-2 mt-2" aria-live="polite"></div>
+        </div>
+
         <div class="flex items-start gap-2">
           <input id="terms" name="terms" type="checkbox" required class="h-5 w-5 text-blue-600 border-gray-300 rounded mt-1">
           <label for="terms" class="text-gray-700 text-sm leading-snug">
@@ -83,8 +82,8 @@
           </label>
         </div>
 
-        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-full flex items-center justify-center gap-2 hover:bg-blue-700 transition">
-          <i class="fa fa-paper-plane"></i> Enviar Solicitação via WhatsApp
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-full flex items-center justify-center gap-2 hover:bg-blue-700 transition" aria-label="Enviar solicitação via WhatsApp">
+          <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Enviar Solicitação via WhatsApp
         </button>
       </form>
 
@@ -99,14 +98,26 @@
     const evidenceInput = document.getElementById('evidence');
     const preview = document.getElementById('preview');
     let selectedFiles = [];
+    let objectUrls = []; // para revogar depois
+
+    function clearPreview() {
+      // revoke object URLs
+      objectUrls.forEach(url => {
+        try { URL.revokeObjectURL(url); } catch (e) { /* ignore */ }
+      });
+      objectUrls = [];
+      preview.innerHTML = '';
+    }
 
     evidenceInput.addEventListener('change', e => {
-      preview.innerHTML = '';
-      selectedFiles = Array.from(e.target.files);
+      clearPreview();
+      selectedFiles = Array.from(e.target.files || []);
       selectedFiles.forEach(file => {
         const url = URL.createObjectURL(file);
+        objectUrls.push(url);
         const img = document.createElement('img');
         img.src = url;
+        img.alt = file.name || 'Imagem enviada pelo usuário';
         img.className = 'preview-img';
         preview.appendChild(img);
       });
@@ -143,30 +154,46 @@
       `.trim();
 
       try {
-        if (navigator.canShare && navigator.canShare({ files: selectedFiles })) {
+        const canShareFiles = !!(navigator.canShare && selectedFiles.length > 0 && navigator.canShare({ files: selectedFiles }));
+        const canShare = !!navigator.share;
+
+        if (canShare && canShareFiles) {
+          // tenta compartilhar arquivos + texto (apenas em navegadores que suportam)
           await navigator.share({
             title: 'Solicitação de Serviço',
             text: message,
-            files: selectedFiles,
+            files: selectedFiles
           });
-          alert('Solicitação enviada com sucesso pelo WhatsApp!');
+          alert('Solicitação enviada com sucesso via compartilhamento nativo!');
+        } else if (canShare) {
+          // compartilha apenas texto (se não puder compartilhar arquivos)
+          await navigator.share({ title: 'Solicitação de Serviço', text: message });
+          alert('Solicitação enviada com sucesso via compartilhamento nativo!');
         } else {
+          // fallback para abrir WhatsApp (web ou app), sem anexos
           const encoded = encodeURIComponent(message);
           const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-          const url = isMobile
-            ? `whatsapp://send?text=${encoded}`
-            : `https://web.whatsapp.com/send?text=${encoded}`;
-          window.open(url, '_blank');
-          alert('Seu dispositivo não permite envio direto de fotos. Mensagem aberta no WhatsApp.');
+          const url = isMobile ? `whatsapp://send?text=${encoded}` : `https://web.whatsapp.com/send?text=${encoded}`;
+
+          // usar anchor para poder setar rel
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          alert('Seu dispositivo não permite envio direto de fotos. Mensagem aberta no WhatsApp (sem anexos).');
         }
 
         form.reset();
-        preview.innerHTML = '';
+        clearPreview();
         selectedFiles = [];
 
       } catch (err) {
-        console.error(err);
-        alert('Erro ao enviar via WhatsApp. Tente novamente.');
+        console.error('Erro ao compartilhar:', err);
+        alert('Erro ao enviar. Verifique permissões e tente novamente.');
       }
     });
   </script>
